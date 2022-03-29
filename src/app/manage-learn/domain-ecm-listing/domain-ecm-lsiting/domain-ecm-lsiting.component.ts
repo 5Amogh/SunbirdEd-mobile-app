@@ -169,7 +169,8 @@ export class DomainEcmLsitingComponent {
       selectedEvidence: evidenceIndex,
       entityDetails: this.entityData,
     };
-    return await this.evdnsServ.openActionSheet(options, 'FRMELEMNTS_LBL_OBSERVATION');
+    // return await this.evdnsServ.openActionSheet(options, 'FRMELEMNTS_LBL_OBSERVATION');
+    return 'view'
   }
 
   async openEvidence(evidenceIndex) {
