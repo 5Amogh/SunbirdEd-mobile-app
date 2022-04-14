@@ -2,14 +2,16 @@ import { CategoryListPage } from './category-list-page';
 import { CommonUtilService } from '../../services/common-util.service';
 import { Router } from '@angular/router';
 import { AppHeaderService } from '../../services/app-header.service';
-import { of } from 'rxjs';
+import { of, Subscription } from 'rxjs';
 import { NavigationService } from '../../services/navigation-handler.service';
-import { ContentService, CourseService, FormService, ProfileService } from '@project-sunbird/sunbird-sdk';
+import { ContentService, CourseService, FormService, ProfileService,  ContentSearchCriteria} from '@project-sunbird/sunbird-sdk';
 import { ScrollToService } from '../../services/scroll-to.service';
-import { Environment, FormAndFrameworkUtilService, InteractSubtype, InteractType, PageId, TelemetryGeneratorService } from '../../services';
+import { Environment, FormAndFrameworkUtilService, ImpressionType, InteractSubtype, InteractType, PageId, TelemetryGeneratorService } from '../../services';
 import { ContentUtil } from '@app/util/content-util';
 import { RouterLinks } from '@app/app/app.constant';
 import { ModalController } from '@ionic/angular';
+import { access } from 'fs';
+import { doesNotReject } from 'assert';
 
 describe('CategoryListPage', () => {
     let categoryListPage: CategoryListPage;
@@ -129,7 +131,67 @@ describe('CategoryListPage', () => {
         //         done();
         //     }, 0);
         // });
-    });
+            it('should generate impression telemetry', (done) => {
+                //arrange
+                const corRelationList = [
+                    {
+                        "id": "Sample",
+                    "type": "form-page"
+                    }
+                ]
+                mockHeaderService.showHeaderWithBackButton = jest.fn();
+                mockTelemetryGeneratorService.generateImpressionTelemetry = jest.fn();
+                //act
+                categoryListPage.ionViewWillEnter();
+                //assert
+                setTimeout(() => {
+                expect(mockHeaderService.showHeaderWithBackButton).toHaveBeenCalled();
+                expect(mockTelemetryGeneratorService.generateImpressionTelemetry).toHaveBeenCalledWith(
+                    ImpressionType.PAGE_LOADED,
+                    '',
+                    PageId.CATEGORY_RESULTS,
+                    Environment.HOME,
+                    undefined, undefined, undefined, undefined,
+                    corRelationList
+                )
+                done();
+            }, 0);
+        });
+        });
+
+        describe('ngOnInit' , () => {
+            it('should get Appname' , () => {
+                //arrange
+                const acc = ['sample'];
+                acc.push('sample');
+                const formAPIFacets =[
+                    {
+                        "code": "primaryCategory",
+                        "type": "dropdown",
+                        "name": "Content Type",
+                        "placeholder": "Select Content Type",
+                        "multiple": true,
+                        "index": 0
+                    },
+                    {
+                        "code": "subject",
+                        "type": "dropdown",
+                        "name": "Subject",
+                        "placeholder": "Select Subject",
+                        "multiple": true,
+                        "index": 1
+                    }
+                ];
+                mockCommonUtilService.getAppName = jest.fn();
+                //act
+                categoryListPage.ngOnInit();
+                //assert
+                setTimeout(() => {
+                    expect(mockCommonUtilService.getAppName).toHaveBeenCalled();
+                    expect(acc).toEqual('sample');
+                }, 0);
+            });
+        });
 
     describe('navigate to ViewMore page', () => {
         it('should generate interact telemetry and if network available and navigate to textbook viewmore', () => {
@@ -155,7 +217,6 @@ describe('CategoryListPage', () => {
                 }
             }, 'Mathematics');
             // assert
-
             expect(mockTelemetryGeneratorService.generateInteractTelemetry).toHaveBeenCalledWith(
                 InteractType.TOUCH,
                 InteractSubtype.VIEW_MORE_CLICKED,
@@ -210,7 +271,6 @@ describe('CategoryListPage', () => {
                 }
             }, 'Mathematics');
             // assert
-
             expect(mockTelemetryGeneratorService.generateInteractTelemetry).toHaveBeenCalledWith(
                 InteractType.TOUCH,
                 InteractSubtype.VIEW_MORE_CLICKED,
@@ -238,7 +298,6 @@ describe('CategoryListPage', () => {
                 }
             });
             const rollUp = ContentUtil.generateRollUp(undefined, 'sample_id');
-
             // act
             categoryListPage.navigateToDetailPage({
                 data: {
@@ -281,7 +340,6 @@ describe('CategoryListPage', () => {
                 }
             });
             const rollUp = ContentUtil.generateRollUp(undefined, 'sample_id');
-
             // act
             categoryListPage.navigateToDetailPage({
                 data: {
@@ -358,5 +416,25 @@ describe('CategoryListPage', () => {
             block: 'center',
             behavior: 'smooth'
         });
+    });
+    it('Should reload the drop down', () => {
+        //arrange
+        const item = {
+            content: {},
+            isAvailableLocally: true
+        };
+        const index =0;
+        //act
+        categoryListPage.reloadDropdown(index, item);
+        //assert
+        expect(item);
+    });
+    it('should call clearAllSubscription on ngOnDestroy', () => {
+        // arrange
+        const formControlSubscriptions: Partial<Subscription[]> = [];
+        // act
+        categoryListPage.ngOnDestroy();
+        // assert
+        expect(formControlSubscriptions.forEach(s => s.unsubscribe()));
     });
 });

@@ -32,6 +32,7 @@ import { ContentFilterConfig, RouterLinks } from '@app/app/app.constant';
 import { NavigationService } from '../../services/navigation-handler.service';
 import { ProfileHandler } from '../../services/profile-handler';
 import { SegmentationTagService } from '../../services/segmentation-tag/segmentation-tag.service';
+import { CertificateService } from '@project-sunbird/sunbird-sdk';
 
 describe('Profile.page', () => {
     let profilePage: ProfilePage;
@@ -126,6 +127,10 @@ describe('Profile.page', () => {
     const mockProfileHandler: Partial<ProfileHandler> = {
         getPersonaConfig: jest.fn(),
         getSubPersona: jest.fn()
+    };
+
+    const mockCertificateService: Partial<CertificateService> = {
+        getCertificates: jest.fn()
     };
 
     global.window.segmentation = {
@@ -264,6 +269,13 @@ describe('Profile.page', () => {
             });
             mockFrameworkService.setActiveChannelId = jest.fn(() => of(undefined));
             mockProfileService.isDefaultChannelProfile = jest.fn(() => of(true));
+            const subPersonaCodes = [
+                {
+                    type:'administrator',
+                    subType: 'hm'
+                }
+            ]
+            subPersonaCodes.push({ type: 'some_sample', subType: 'meo' });
             // act
             profilePage.refreshProfileData();
             setTimeout(() => {
@@ -273,6 +285,11 @@ describe('Profile.page', () => {
                 expect(mockProfileService.getActiveSessionProfile).toHaveBeenCalled();
                 expect(mockFormAndFrameworkUtilService.updateLoggedInUser).toHaveBeenCalled();
                 expect(mockFrameworkService.setActiveChannelId).toHaveBeenCalledWith(mockProfileData.rootOrg.hashTagId);
+                expect(subPersonaCodes).toEqual(
+                    expect.arrayContaining([
+                    expect.objectContaining({subType: 'meo'})
+                    ])
+                );
                 done();
             }, 0);
         });
