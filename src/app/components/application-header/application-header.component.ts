@@ -514,9 +514,12 @@ export class ApplicationHeaderComponent implements OnInit, OnDestroy {
   private async checkCurrentOrientation() {
     const currentOritentation = await this.preference.getString(PreferenceKey.ORIENTATION).toPromise();
     if ( currentOritentation === AppOrientation.LANDSCAPE) {
-      this.orientationToSwitch = AppOrientation.POTRAIT;
+      this.orientationToSwitch = AppOrientation.PORTRAIT;
     } else {
       this.orientationToSwitch = AppOrientation.LANDSCAPE;
     }
   }
+  
+
+  signin() { this.router.navigate([RouterLinks.SIGN_IN]); }
 }
