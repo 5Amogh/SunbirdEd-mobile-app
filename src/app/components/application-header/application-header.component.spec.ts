@@ -59,11 +59,11 @@ describe('ApplicationHeaderComponent', () => {
         isAccessibleForNonStudentRole: jest.fn()
     };
     const mockEvents: Partial<Events> = {
-        subscribe: jest.fn((_, fn) => fn(param)),
+        subscribe: jest.fn((_, fn) => fn()),
         publish: jest.fn()
     };
     const mockAppGlobalService: Partial<AppGlobalService> = {
-        isUserLoggedIn: jest.fn(() => true),
+        isUserLoggedIn: jest.fn(),
         getGuestUserType: jest.fn()
     };
     const mockAppVersion: Partial<AppVersion> = {
@@ -152,28 +152,66 @@ describe('ApplicationHeaderComponent', () => {
     it('should create instance of application header component', () => {
         expect(applicationHeaderComponent).toBeTruthy();
     });
-    it('should check the orientation on chnage tp landscape', () => {
-        mockEvents.subscribe = jest.fn((topic, fn) => {
-            if (topic === 'orientation') {
-                fn(() => {mockSharedPreference.getString = jest.fn(() => of('Potrait'))});
-            }
+
+    describe('checkCurrentOrientation', ()=> {
+        it('should check the orientation on chnage tp landscape', () => {
+            mockSharedPreference.getString = jest.fn(() => of('Potrait'));
+            applicationHeaderComponent.orientationToSwitch = AppOrientation.LANDSCAPE;
+            applicationHeaderComponent = new ApplicationHeaderComponent(
+                mockSharedPreference as SharedPreferences,
+                mockDownloadService as DownloadService,
+                mockPushNotificationService as PushNotificationService,
+                mockEventsBusService as EventsBusService,
+                mockProfileService as ProfileService,
+                mockMenuController as MenuController,
+                mockCommonUtilService as CommonUtilService,
+                mockEvents as Events,
+                mockAppGlobalService as AppGlobalService,
+                mockAppVersion as AppVersion,
+                mockUtilityService as UtilityService,
+                mockChangeDetectionRef as ChangeDetectorRef,
+                mockNotification as NotificationService,
+                mockTranslate as TranslateService,
+                mockPlatform as Platform,
+                mockRouter as Router,
+                mockNgZone as NgZone,
+                mockTelemetryGeneratorService as TelemetryGeneratorService,
+                mockActivePageService as ActivePageService,
+                mockPopoverCtrl as PopoverController,
+                mockTncUpdateHandlerService as TncUpdateHandlerService,
+                mockAppHeaderService as AppHeaderService
+            );
         });
-        applicationHeaderComponent.orientationToSwitch = AppOrientation.LANDSCAPE;
-        setTimeout(() => {
-            expect(mockEvents.subscribe).toHaveBeenCalled();
-        }, 0);
-    });
-    it('should check the orientation on change to potrait', () => {
-        mockEvents.subscribe = jest.fn((topic, fn) => {
-            if (topic === 'orientation') {
-                fn(() => {mockSharedPreference.getString = jest.fn(() => of('Landscape'))});
-            }
+        it('should check the orientation on change to potrait', () => {
+            mockSharedPreference.getString = jest.fn(() => of('Landscape'));
+            applicationHeaderComponent.orientationToSwitch = AppOrientation.PORTRAIT;
+            applicationHeaderComponent = new ApplicationHeaderComponent(
+                mockSharedPreference as SharedPreferences,
+                mockDownloadService as DownloadService,
+                mockPushNotificationService as PushNotificationService,
+                mockEventsBusService as EventsBusService,
+                mockProfileService as ProfileService,
+                mockMenuController as MenuController,
+                mockCommonUtilService as CommonUtilService,
+                mockEvents as Events,
+                mockAppGlobalService as AppGlobalService,
+                mockAppVersion as AppVersion,
+                mockUtilityService as UtilityService,
+                mockChangeDetectionRef as ChangeDetectorRef,
+                mockNotification as NotificationService,
+                mockTranslate as TranslateService,
+                mockPlatform as Platform,
+                mockRouter as Router,
+                mockNgZone as NgZone,
+                mockTelemetryGeneratorService as TelemetryGeneratorService,
+                mockActivePageService as ActivePageService,
+                mockPopoverCtrl as PopoverController,
+                mockTncUpdateHandlerService as TncUpdateHandlerService,
+                mockAppHeaderService as AppHeaderService
+            );
         });
-        applicationHeaderComponent.orientationToSwitch = AppOrientation.POTRAIT;
-        setTimeout(() => {
-            expect(mockEvents.subscribe).toHaveBeenCalled();
-        }, 0);
-    });
+    })
+
     describe('onInit', () => {
         it('should check for app update when returns true', (done) => {
             // arrange
@@ -687,7 +725,6 @@ describe('ApplicationHeaderComponent', () => {
             mockEvents.publish = jest.fn();
             mockMenuController.close = jest.fn(() => Promise.resolve(true));
             mockTncUpdateHandlerService.checkForTncUpdate = jest.fn();
-            // jest.spyOn(applicationHeaderComponent, 'showSwitchSuccessPopup').mockImplementation();
             mockSharedPreference.putString = jest.fn(() => of());
             // act
             applicationHeaderComponent.switchUser(user);
